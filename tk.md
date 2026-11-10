@@ -1,0 +1,2 @@
+havanhung10a2_db_user
+GQVfIUrt54W2al2q
