@@ -1,77 +1,13 @@
 require("dotenv").config();
 
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const connectDB = require("./config/database");
+const app = require("./app");
 
-const app = express();
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
-
-// Serve ảnh đã tải lên (backend/uploads) tại /uploads/<tên file>
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Routes
-const authRoutes = require("./routes/auth.routes");
-const productRoutes = require("./routes/product.routes");
-const categoryRoutes = require("./routes/category.routes");
-const comboRoutes = require("./routes/combo.routes");
-const orderRoutes = require("./routes/order.routes");
-const cartRoutes = require("./routes/cart.routes");
-const uploadRoutes = require("./routes/upload.routes");
-
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/combos", comboRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/uploads", uploadRoutes);
-
-app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Nếp Nem Backend API is running!",
-  });
+app.listen(PORT, () => {
+  console.log("-----------------------------------");
+  console.log("✅ BACKEND KHỞI ĐỘNG THÀNH CÔNG");
+  console.log(`🌐 Local: http://localhost:${PORT}`);
+  console.log(`🔍 Health: http://localhost:${PORT}/api/health`);
+  console.log("-----------------------------------");
 });
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    server: "running",
-    database:
-      require("mongoose").connection.readyState === 1
-        ? "connected"
-        : "disconnected",
-  });
-});
-
-const startServer = async () => {
-  try {
-    console.log("🚀 Đang khởi động Backend...");
-
-    const isConnected = await connectDB();
-
-    if (!isConnected) {
-      console.error("⛔ Backend không thể khởi động vì MongoDB lỗi!");
-      process.exit(1);
-    }
-
-    const PORT = process.env.PORT || 5000;
-
-    app.listen(PORT, () => {
-      console.log("-----------------------------------");
-      console.log("✅ BACKEND KHỞI ĐỘNG THÀNH CÔNG");
-      console.log(`🌐 Local: http://localhost:${PORT}`);
-      console.log(`🔍 Health: http://localhost:${PORT}/api/health`);
-      console.log("-----------------------------------");
-    });
-  } catch (error) {
-    console.error("❌ Backend khởi động thất bại:", error.message);
-    process.exit(1);
-  }
-};
-
-startServer();

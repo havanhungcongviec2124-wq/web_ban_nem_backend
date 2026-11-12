@@ -2,23 +2,11 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
-const crypto = require("crypto");
 const uploadController = require("../controllers/upload.controller");
 const { authenticate, authorizeAdmin } = require("../middlewares/auth.middleware");
 
-// Thư mục lưu ảnh: backend/uploads (tự tạo nếu chưa có)
-const uploadDir = path.join(__dirname, "..", "uploads");
-fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = (path.extname(file.originalname) || ".png").toLowerCase();
-    const name = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}${ext}`;
-    cb(null, name);
-  },
-});
+// Lưu ảnh trong RAM rồi ghi vào MongoDB — chạy được cả trên Node lẫn Cloudflare Workers
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,

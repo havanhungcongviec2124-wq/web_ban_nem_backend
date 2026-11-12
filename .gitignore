@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Biến môi trường & bí mật
+.env
+.env.*
+!.env.example
+
+# Tài khoản / ghi chú nội bộ
+tk.md
+
+# Ảnh tải lên (nay lưu trong MongoDB, không cần đưa lên git)
+uploads/
+
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars
+
+# Log & file tạm
+*.log
+.DS_Store

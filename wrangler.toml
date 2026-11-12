@@ -1,0 +1,23 @@
+# Backend Nếp Nem chạy trên Cloudflare Workers
+name = "nepnem"
+main = "worker.js"
+
+# nodejs_compat: cho phép chạy Express 5 + Mongoose (node:net, node:tls, node:http...)
+compatibility_date = "2026-08-04"
+compatibility_flags = ["nodejs_compat"]
+
+# Durable Object giữ app Express + connection MongoDB sống giữa các request
+[[durable_objects.bindings]]
+name = "BACKEND"
+class_name = "BackendDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BackendDO"]
+
+[observability]
+enabled = true
+
+# Secrets cần khai báo (không nằm trong file này):
+#   npx wrangler secret put MONGODB_URI
+#   npx wrangler secret put JWT_SECRET

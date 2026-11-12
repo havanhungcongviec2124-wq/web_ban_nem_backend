@@ -1,7 +1,11 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/Auth.models");
+const { getEnv } = require("../config/env");
 
-const JWT_SECRET = process.env.JWT_SECRET || "b91e0b990635362e07b9789899538b321fd84123ccf5ee2a07edae6706c03fd6";
+const JWT_SECRET = getEnv(
+  "JWT_SECRET",
+  "b91e0b990635362e07b9789899538b321fd84123ccf5ee2a07edae6706c03fd6"
+);
 
 // Middleware xác thực token
 const protect = async (req, res, next) => {
