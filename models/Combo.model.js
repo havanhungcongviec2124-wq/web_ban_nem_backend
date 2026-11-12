@@ -23,6 +23,7 @@ const comboSchema = new mongoose.Schema({
   gallery: [{ type: String }],
   sku: { type: String, default: "" },
   badge: { type: String, default: "" },
+  serves: { type: String, default: "" },
   soldCount: { type: Number, default: 0 },
   status: { type: String, enum: ["Đang bán", "Ngừng bán", "Hết hàng"], default: "Đang bán" },
   pack: { type: String, default: "" },

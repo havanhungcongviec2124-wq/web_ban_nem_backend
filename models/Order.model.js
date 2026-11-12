@@ -8,6 +8,7 @@ const orderItemSpicesSchema = new mongoose.Schema({
 
 const comboSubItemSchema = new mongoose.Schema({
   name: { type: String },
+  qty: { type: Number, default: 1 },
   qtyText: { type: String },
   spices: orderItemSpicesSchema,
 }, { _id: false });

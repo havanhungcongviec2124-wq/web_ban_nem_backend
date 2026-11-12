@@ -4,7 +4,7 @@ const { generateToken } = require("../middlewares/auth.middleware");
 // POST /api/auth/register
 exports.register = async (req, res) => {
   try {
-    const { name, email, phone, password, role } = req.body;
+    const { name, email, phone, password } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: "Vui lòng điền đầy đủ Họ tên, Email và Mật khẩu!" });
     }
@@ -15,13 +15,14 @@ exports.register = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ success: false, message: "Email này đã được đăng ký!" });
     }
-    const userRole = role === "admin" ? "admin" : "user";
+    // Đăng ký công khai luôn tạo tài khoản Khách hàng.
+    // Tài khoản Admin chỉ được tạo qua seed/điều hành hệ thống, không qua API công khai.
     const newUser = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       phone: phone ? phone.trim() : "",
       password,
-      role: userRole,
+      role: "user",
     });
     const token = generateToken(newUser._id);
     return res.status(201).json({
@@ -65,6 +66,20 @@ exports.login = async (req, res) => {
 // GET /api/auth/me
 exports.getMe = async (req, res) => {
   return res.json({ success: true, user: req.user });
+};
+
+// GET /api/auth/check-email?email=... — kiểm tra email đã có tài khoản chưa
+exports.checkEmail = async (req, res) => {
+  try {
+    const email = (req.query.email || '').toLowerCase().trim();
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Thiếu tham số email!' });
+    }
+    const existingUser = await User.findOne({ email }).select('_id');
+    return res.json({ success: true, exists: Boolean(existingUser) });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 // GET /api/auth/users — admin lấy danh sách user

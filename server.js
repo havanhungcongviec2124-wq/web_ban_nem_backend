@@ -2,12 +2,16 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const connectDB = require("./config/database");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Serve ảnh đã tải lên (backend/uploads) tại /uploads/<tên file>
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 const authRoutes = require("./routes/auth.routes");
@@ -16,6 +20,7 @@ const categoryRoutes = require("./routes/category.routes");
 const comboRoutes = require("./routes/combo.routes");
 const orderRoutes = require("./routes/order.routes");
 const cartRoutes = require("./routes/cart.routes");
+const uploadRoutes = require("./routes/upload.routes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
@@ -23,6 +28,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/combos", comboRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 app.get("/", (req, res) => {
   res.json({
