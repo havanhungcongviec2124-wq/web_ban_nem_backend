@@ -245,11 +245,15 @@ const seedData = async () => {
     // 1. Seed Users
     console.log("➡️ Đang tạo Users...");
     await User.deleteMany({});
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) {
+      throw new Error("Thiếu ADMIN_PASSWORD trong .env — đặt mật khẩu admin trước khi seed.");
+    }
     const adminUser = await User.create({
       name: "Quản trị viên Nếp Nem",
-      email: "admin@nepnem.vn",
-      phone: "0987654321",
-      password: "admin",
+      email: process.env.ADMIN_EMAIL || "0936993543@nepnem.vn",
+      phone: process.env.ADMIN_PHONE || "0936993543",
+      password: adminPassword,
       role: "admin",
       avatar: "/assets/user.svg",
     });

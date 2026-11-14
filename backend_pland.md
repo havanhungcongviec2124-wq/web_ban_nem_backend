@@ -54,16 +54,9 @@ POST /add — thêm item
 PUT /update — cập nhật số lượng
 DELETE /remove/:cartItemId — xóa item
 DELETE /clear — xóa toàn bộ
-## 3. Seed Data
+## 3. Dữ liệu
 
-Script seed.js nạp dữ liệu mẫu từ mockData.js vào MongoDB:
-
-4 categories
-4 products
-2 combos
-2 users (admin + user)
-6 customers (từ CUSTOMERS)
-6 orders mẫu
+Toàn bộ dữ liệu (sản phẩm, combo, danh mục, người dùng, đơn hàng, giỏ hàng) được lưu trực tiếp trong MongoDB Atlas và quản lý qua API/trang Admin. Backend không còn script seed và không tự sinh dữ liệu mẫu.
 4. Frontend — Cập nhật kết nối
 AuthContext.jsx → gọi /api/auth/login, /api/auth/register
 CartContext.jsx → gọi /api/cart/*
@@ -73,7 +66,7 @@ Checkout → POST /api/orders
 5. Thứ tự triển khai
 ✅ Tạo tất cả Models
 ✅ Tạo tất cả Routes + Controllers
-✅ Tạo seed.js + chạy seed
+✅ Dữ liệu nạp trực tiếp vào MongoDB Atlas (không còn seed.js)
 ✅ Cập nhật server.js đăng ký routes mới
 ✅ Cập nhật frontend AuthContext, CartContext
 ✅ Cập nhật frontend pages gọi API thực

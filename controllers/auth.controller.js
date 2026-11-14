@@ -41,15 +41,29 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: "Vui lòng nhập Email và Mật khẩu!" });
+      return res.status(400).json({ success: false, message: "Vui lòng nhập Email/Số điện thoại và Mật khẩu!" });
     }
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    // Cho phép đăng nhập bằng email hoặc số điện thoại.
+    const identifier = String(email).trim();
+    const normalizedEmail = identifier.toLowerCase();
+    const phoneDigits = identifier.replace(/[^\d]/g, "");
+    const query = identifier.includes("@")
+      ? { email: normalizedEmail }
+      : {
+          $or: [
+            { email: normalizedEmail },
+            ...(phoneDigits ? [{ phone: phoneDigits }, { phone: identifier }] : []),
+          ],
+        };
+
+    const user = await User.findOne(query);
     if (!user) {
-      return res.status(401).json({ success: false, message: "Email hoặc mật khẩu không chính xác!" });
+      return res.status(401).json({ success: false, message: "Email/Số điện thoại hoặc mật khẩu không chính xác!" });
     }
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Email hoặc mật khẩu không chính xác!" });
+      return res.status(401).json({ success: false, message: "Email/Số điện thoại hoặc mật khẩu không chính xác!" });
     }
     const token = generateToken(user._id);
     return res.json({
