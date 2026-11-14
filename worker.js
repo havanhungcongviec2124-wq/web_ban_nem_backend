@@ -10,7 +10,7 @@ export { BackendDO };
 
 export default {
   async fetch(request, env) {
-    const id = env.BACKEND.idFromName('nepnem-backend-v7');
+    const id = env.BACKEND.idFromName('nepnem-backend-v8');
     const stub = env.BACKEND.get(id, { locationHint: 'apac' });
     return stub.fetch(request);
   },

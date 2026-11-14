@@ -5,6 +5,9 @@ const connectDB = require("./config/database");
 
 const app = express();
 
+// Không gửi header "X-Powered-By: Express" để không lộ công nghệ backend.
+app.disable("x-powered-by");
+
 app.set("trust proxy", true);
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
