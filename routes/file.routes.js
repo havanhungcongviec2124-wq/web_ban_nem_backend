@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Upload = require("../models/Upload.model");
+const { serverError } = require("../utils/http");
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.get("/:id", async (req, res) => {
     res.set("Content-Length", String(doc.data.length));
     return res.send(doc.data);
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 });
 

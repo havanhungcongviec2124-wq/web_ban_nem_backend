@@ -1,4 +1,5 @@
 const path = require("path");
+const { serverError } = require("../utils/http");
 const crypto = require("crypto");
 const Upload = require("../models/Upload.model");
 
@@ -28,6 +29,6 @@ exports.uploadImage = async (req, res) => {
 
     return res.json({ success: true, url, filename });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message || "Tải ảnh thất bại" });
+    return serverError(res, error);
   }
 };

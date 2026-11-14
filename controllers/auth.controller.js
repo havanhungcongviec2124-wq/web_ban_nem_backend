@@ -1,4 +1,5 @@
 const User = require("../models/Auth.models");
+const { serverError } = require("../utils/http");
 const { generateToken } = require("../middlewares/auth.middleware");
 
 // POST /api/auth/register
@@ -28,11 +29,11 @@ exports.register = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Đăng ký thành công!",
-      user: { id: newUser._id, name: newUser.name, email: newUser.email, phone: newUser.phone, role: newUser.role, avatar: newUser.avatar },
+      user: { name: newUser.name, email: newUser.email, phone: newUser.phone, role: newUser.role, avatar: newUser.avatar },
       token,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message || "Lỗi máy chủ" });
+    return serverError(res, error);
   }
 };
 
@@ -58,28 +59,38 @@ exports.login = async (req, res) => {
         };
 
     const user = await User.findOne(query);
-    if (!user) {
-      return res.status(401).json({ success: false, message: "Email/Số điện thoại hoặc mật khẩu không chính xác!" });
-    }
+    // Trả 200 với success:false để trình duyệt không ghi log lỗi 401 ra console.
+    const invalid = () =>
+      res.json({ success: false, message: "Số điện thoại/email hoặc mật khẩu không đúng." });
+    if (!user) return invalid();
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Email/Số điện thoại hoặc mật khẩu không chính xác!" });
-    }
+    if (!isMatch) return invalid();
     const token = generateToken(user._id);
     return res.json({
       success: true,
       message: "Đăng nhập thành công!",
-      user: { id: user._id, name: user.name, email: user.email, phone: user.phone, role: user.role, avatar: user.avatar },
+      user: { name: user.name, email: user.email, phone: user.phone, role: user.role, avatar: user.avatar },
       token,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
-// GET /api/auth/me
+// GET /api/auth/me — chỉ trả thông tin cần thiết, không trả _id/__v của DB
 exports.getMe = async (req, res) => {
-  return res.json({ success: true, user: req.user });
+  const u = req.user || {};
+  return res.json({
+    success: true,
+    user: {
+      name: u.name || "",
+      email: u.email || "",
+      phone: u.phone || "",
+      role: u.role || "user",
+      avatar: u.avatar || "",
+      address: u.address || "",
+    },
+  });
 };
 
 // GET /api/auth/check-email?email=... — kiểm tra email đã có tài khoản chưa
@@ -92,17 +103,20 @@ exports.checkEmail = async (req, res) => {
     const existingUser = await User.findOne({ email }).select('_id');
     return res.json({ success: true, exists: Boolean(existingUser) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
 // GET /api/auth/users — admin lấy danh sách user
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password").sort({ createdAt: -1 });
+    const users = await User.find()
+      .select("-_id -password -__v")
+      .sort({ createdAt: -1 })
+      .lean();
     return res.json({ success: true, users });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 

@@ -1,6 +1,17 @@
 const Order = require("../models/Order.model");
+const { serverError } = require("../utils/http");
 const Cart = require("../models/Cart.model");
 const mongoose = require("mongoose");
+
+// Chỉ trả dữ liệu cần thiết — không lộ _id, userId hay __v của database
+const publicOrder = (order) => {
+  if (!order) return order;
+  const obj = order.toObject ? order.toObject() : { ...order };
+  delete obj._id;
+  delete obj.userId;
+  delete obj.__v;
+  return obj;
+};
 
 // Tìm đơn hàng theo MongoDB _id hoặc mã đơn hàng (orderCode, ví dụ NN0611-028)
 const findOrderQuery = (idOrCode) =>
@@ -13,9 +24,9 @@ exports.getOrders = async (req, res) => {
     let filter = {};
     if (status && status !== "all") filter.status = status;
     const orders = await Order.find(filter).sort({ createdAt: -1 });
-    return res.json({ success: true, orders });
+    return res.json({ success: true, orders: orders.map(publicOrder) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -23,9 +34,9 @@ exports.getOrders = async (req, res) => {
 exports.getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user._id }).sort({ createdAt: -1 });
-    return res.json({ success: true, orders });
+    return res.json({ success: true, orders: orders.map(publicOrder) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -37,9 +48,9 @@ exports.getOrderById = async (req, res) => {
     if (req.user.role !== "admin" && (!order.userId || order.userId.toString() !== req.user._id.toString())) {
       return res.status(403).json({ success: false, message: "Không có quyền xem đơn hàng này" });
     }
-    return res.json({ success: true, order });
+    return res.json({ success: true, order: publicOrder(order) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -88,9 +99,9 @@ exports.createOrder = async (req, res) => {
     // Xóa giỏ hàng sau khi đặt
     await Cart.findOneAndUpdate({ userId: req.user._id }, { items: [] });
 
-    return res.status(201).json({ success: true, message: "Đặt hàng thành công!", order });
+    return res.status(201).json({ success: true, message: "Đặt hàng thành công!", order: publicOrder(order) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -154,9 +165,9 @@ exports.updateOrderStatus = async (req, res) => {
     if (paymentStatus) updateData.paymentStatus = paymentStatus;
 
     const updated = await Order.findOneAndUpdate(query, updateData, { returnDocument: "after" });
-    return res.json({ success: true, order: updated });
+    return res.json({ success: true, order: publicOrder(updated) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 

@@ -1,4 +1,5 @@
 const Product = require("../models/Product.model");
+const { serverError } = require("../utils/http");
 
 // GET /api/products/meta — thông tin tổng quan
 exports.getProductMeta = async (req, res) => {
@@ -8,7 +9,7 @@ exports.getProductMeta = async (req, res) => {
     const featured = await Product.countDocuments({ isFeatured: true });
     return res.json({ success: true, meta: { total, bestSellers, featured } });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -23,7 +24,7 @@ exports.getProducts = async (req, res) => {
     const products = await Product.find(filter).sort({ createdAt: -1 });
     return res.json({ success: true, products });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -38,7 +39,7 @@ exports.getProductById = async (req, res) => {
     if (!product) return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm" });
     return res.json({ success: true, product });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -48,7 +49,7 @@ exports.createProduct = async (req, res) => {
     const product = await Product.create(req.body);
     return res.status(201).json({ success: true, product });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -62,7 +63,7 @@ exports.updateProduct = async (req, res) => {
     if (!product) return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm" });
     return res.json({ success: true, product });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -76,7 +77,7 @@ exports.deleteProduct = async (req, res) => {
     if (!product) return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm" });
     return res.json({ success: true, message: "Đã xóa sản phẩm" });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 

@@ -1,4 +1,5 @@
 const Combo = require("../models/Combo.model");
+const { serverError } = require("../utils/http");
 
 // GET /api/combos
 exports.getCombos = async (req, res) => {
@@ -6,7 +7,7 @@ exports.getCombos = async (req, res) => {
     const combos = await Combo.find().sort({ createdAt: -1 });
     return res.json({ success: true, combos });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -20,7 +21,7 @@ exports.getComboById = async (req, res) => {
     if (!combo) return res.status(404).json({ success: false, message: "Không tìm thấy combo" });
     return res.json({ success: true, combo });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -30,7 +31,7 @@ exports.createCombo = async (req, res) => {
     const combo = await Combo.create(req.body);
     return res.status(201).json({ success: true, combo });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -44,7 +45,7 @@ exports.updateCombo = async (req, res) => {
     if (!combo) return res.status(404).json({ success: false, message: "Không tìm thấy combo" });
     return res.json({ success: true, combo });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -57,7 +58,7 @@ exports.deleteCombo = async (req, res) => {
     await Combo.findOneAndDelete(query);
     return res.json({ success: true, message: "Đã xóa combo" });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 

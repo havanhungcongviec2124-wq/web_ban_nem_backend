@@ -24,10 +24,11 @@ router.post("/", authenticate, authorizeAdmin, upload.single("image"), uploadCon
 
 // Chuyển lỗi của multer (quá dung lượng, sai định dạng) thành JSON thay vì trang HTML lỗi
 router.use((err, req, res, next) => {
+  // Không trả chi tiết kỹ thuật của multer ra ngoài
   const message =
     err && err.code === "LIMIT_FILE_SIZE"
       ? "Ảnh quá lớn, tối đa 5MB!"
-      : (err && err.message) || "Tải ảnh thất bại";
+      : "Tải ảnh thất bại. Vui lòng chọn ảnh PNG, JPG, GIF, WEBP hoặc AVIF.";
   return res.status(400).json({ success: false, message });
 });
 

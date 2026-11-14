@@ -1,4 +1,8 @@
 const Cart = require("../models/Cart.model");
+const { serverError } = require("../utils/http");
+
+// Chỉ trả danh sách món — không lộ _id/userId của giỏ hàng
+const publicCart = (cart) => ({ items: cart?.items || [] });
 
 // GET /api/cart
 exports.getCart = async (req, res) => {
@@ -7,9 +11,9 @@ exports.getCart = async (req, res) => {
     if (!cart) {
       cart = await Cart.create({ userId: req.user._id, items: [] });
     }
-    return res.json({ success: true, cart });
+    return res.json({ success: true, cart: publicCart(cart) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -44,9 +48,9 @@ exports.addToCart = async (req, res) => {
     }
 
     await cart.save();
-    return res.json({ success: true, cart });
+    return res.json({ success: true, cart: publicCart(cart) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -67,9 +71,9 @@ exports.updateCartItem = async (req, res) => {
     }
 
     await cart.save();
-    return res.json({ success: true, cart });
+    return res.json({ success: true, cart: publicCart(cart) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -81,9 +85,9 @@ exports.removeFromCart = async (req, res) => {
 
     cart.items = cart.items.filter((i) => i.cartItemId !== req.params.cartItemId);
     await cart.save();
-    return res.json({ success: true, cart });
+    return res.json({ success: true, cart: publicCart(cart) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -97,7 +101,7 @@ exports.clearCart = async (req, res) => {
     }
     return res.json({ success: true, message: "Đã xóa giỏ hàng" });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -112,9 +116,9 @@ exports.syncCart = async (req, res) => {
       cart.items = items || [];
       await cart.save();
     }
-    return res.json({ success: true, cart });
+    return res.json({ success: true, cart: publicCart(cart) });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 

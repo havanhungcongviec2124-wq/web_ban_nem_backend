@@ -7,6 +7,13 @@ const JWT_SECRET = getEnv(
   "b91e0b990635362e07b9789899538b321fd84123ccf5ee2a07edae6706c03fd6"
 );
 
+// Trả về HTTP 200 kèm success:false cho các trường hợp chưa đăng nhập / phiên hết hạn.
+// Lý do: trình duyệt luôn ghi log lỗi ra console với mọi phản hồi 4xx, kể cả khi
+// đó chỉ là trạng thái bình thường (khách chưa đăng nhập). Nội dung trả về vẫn
+// trung tính, không lộ thông tin kỹ thuật.
+const authFailed = (res) =>
+  res.json({ success: false, authRequired: true, message: "Vui lòng đăng nhập để tiếp tục." });
+
 // Middleware xác thực token
 const protect = async (req, res, next) => {
   try {
@@ -15,16 +22,16 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
     }
     if (!token) {
-      return res.status(401).json({ success: false, message: "Vui lòng đăng nhập!" });
+      return authFailed(res);
     }
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = await User.findById(decoded.id).select("-password");
     if (!req.user) {
-      return res.status(401).json({ success: false, message: "Tài khoản không tồn tại!" });
+      return authFailed(res);
     }
     next();
   } catch (error) {
-    return res.status(401).json({ success: false, message: "Token không hợp lệ!" });
+    return authFailed(res);
   }
 };
 
@@ -33,7 +40,7 @@ const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
   } else {
-    return res.status(403).json({ success: false, message: "Chỉ Admin mới có quyền truy cập!" });
+    return res.json({ success: false, message: "Bạn không có quyền thực hiện thao tác này." });
   }
 };
 

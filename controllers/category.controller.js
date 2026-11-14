@@ -1,4 +1,5 @@
 const Category = require("../models/Category.model");
+const { serverError } = require("../utils/http");
 const mongoose = require("mongoose");
 
 // Tìm danh mục theo _id HOẶC slug (frontend có thể gửi cả hai dạng)
@@ -16,7 +17,7 @@ exports.getCategories = async (req, res) => {
     const categories = await Category.find({ visible: true }).sort({ order: 1 });
     return res.json({ success: true, categories });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -26,7 +27,7 @@ exports.getAllCategories = async (req, res) => {
     const categories = await Category.find().sort({ order: 1 });
     return res.json({ success: true, categories });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -39,7 +40,7 @@ exports.getCategoryById = async (req, res) => {
     if (!category) return res.status(404).json({ success: false, message: "Không tìm thấy danh mục" });
     return res.json({ success: true, category });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -67,7 +68,7 @@ exports.createCategory = async (req, res) => {
     const category = await Category.create(data);
     return res.status(201).json({ success: true, category });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -101,7 +102,7 @@ exports.updateCategory = async (req, res) => {
     if (!category) return res.status(404).json({ success: false, message: "Không tìm thấy danh mục" });
     return res.json({ success: true, category });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 
@@ -114,7 +115,7 @@ exports.deleteCategory = async (req, res) => {
     if (!category) return res.status(404).json({ success: false, message: "Không tìm thấy danh mục" });
     return res.json({ success: true, message: "Đã xóa danh mục" });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return serverError(res, error);
   }
 };
 

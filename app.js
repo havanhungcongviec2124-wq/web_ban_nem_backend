@@ -28,20 +28,15 @@ const ensureDB = () => {
 };
 
 app.get("/api/health", async (req, res) => {
-  let dbError = null;
   try {
     await ensureDB();
-  } catch (error) {
-    dbError = require("./config/database").lastError || error.message;
+  } catch {
+    // Không trả chi tiết lỗi kết nối ra ngoài
   }
   res.json({
     success: true,
     server: "running",
-    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-    hasMongoUri: Boolean(require("./config/env").getEnv("MONGODB_URI")),
-    hasJwt: Boolean(require("./config/env").getEnv("JWT_SECRET")),
-    mongoUriPrefix: String(require("./config/env").getEnv("MONGODB_URI")).slice(0, 24),
-    dbError,
+    database: mongoose.connection.readyState === 1 ? "ok" : "unavailable",
   });
 });
 
@@ -50,10 +45,10 @@ app.use(async (req, res, next) => {
     await ensureDB();
     next();
   } catch (error) {
+    console.error("[api-db]", error?.message || error);
     res.status(503).json({
       success: false,
-      message: "Không kết nối được database",
-      error: error.message,
+      message: "Hệ thống đang bận, vui lòng thử lại sau.",
     });
   }
 });
